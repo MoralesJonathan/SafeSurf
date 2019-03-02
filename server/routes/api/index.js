@@ -2,11 +2,11 @@ const router = require("express").Router();
 const userConfigRoutes = require('./userConfig');
 const trackingRoutes = require('./tracking');
 const userRoute = require('./user')
-const cardRoute = require('./generateCard')
+const imageRoute = require('./image')
 
 router.use("/userConfig", userConfigRoutes);
 router.use("/tracking", trackingRoutes);
 router.use("/user", userRoute);
-router.use("/generateCard", cardRoute);
+router.use("/image", imageRoute);
 
 module.exports = router;
