@@ -1,29 +1,32 @@
 const router = require('express').Router(),
     axios = require("axios");
 
+const {AZURE_SUB_KEY} = process.env;
+const api = axios.create({
+    baseURL: 'https://eastus.api.cognitive.microsoft.com/contentmoderator/moderate/v1.0/',
+    timeout: 15000,
+    headers: {
+        'Content-Type': 'application/json',
+        'Ocp-Apim-Subscription-Key': AZURE_SUB_KEY
+    }
+});
 
-router.post("/", (req, res) => {
-    let imagesResult = [];
-    req.body.imgSrcs.forEach(img => {
-        axios({
-            method: 'post',
-            url: 'https://eastus.api.cognitive.microsoft.com/contentmoderator/moderate/v1.0/ProcessImage/Evaluate',
-            headers: { "Content-Type": "application/json", "Ocp-Apim-Subscription-Key": process.env.AZURE_SUB_KEY },
-            data: {
-                "DataRepresentation": "URL",
-                "Value": img
-            }
-        })
-            .then(function (response) {
-                if (response.IsImageAdultClassified && response.IsImageRacyClassified)
-                    imagesResult.push({ "orgSrc": img, "safe": false });
-                else imagesResult.push({ "orgSrc": img, "safe": true });
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+router.post("/", async (req, res) => {
+    const {imgSrcs} = req.body;
+    
+    const results = imgSrcs.map(img => api.post('ProcessImage/Evaluate', {
+        DataRepresentation: 'URL',
+        Value: img
+    }));
+
+    const imgResults = await Promise.all(results);
+    const data = imgResults.map((result, i ) => {
+        const {IsImageAdultClassified, IsImageRacyClassified} = result.data;
+        return {orgSrc: imgSrcs[i], safe: IsImageAdultClassified || IsImageRacyClassified}
     });
-    res.status(200).send(imagesResult)
+
+   
+    res.status(200).json(data)
 });
 
 module.exports = router;
