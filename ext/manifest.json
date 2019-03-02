@@ -1,8 +1,8 @@
 {
-  "name": "CHANGE THIS : Extension boilerplate",
+  "name": "SafeSurf",
   "version": "0.0.1",
   "manifest_version": 2,
-  "description": "This extension was created with the awesome extensionizr.com",
+  "description": "Safely navigate the web",
   "homepage_url": "http://extensionizr.com",
   "icons": {
     "16": "icons/icon16.png",
@@ -12,15 +12,25 @@
   "default_locale": "en",
   "background": {
     "scripts": [
-      "src/bg/background.js"
+      "js/hot-reload.js"
     ],
     "persistent": true
   },
+  "web_accessible_resources": [
+    "assets/spinner.gif"
+  ],
   "browser_action": {
     "default_icon": "icons/icon19.png",
     "default_title": "browser action demo",
     "default_popup": "src/browser_action/browser_action.html"
   },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "css" : ["css/spinnerStyles.css"],
+      "js": ["js/jquery/jquery.min.js", "src/main.js"]
+    }
+  ],
   "permissions": [
     "contentSettings",
     "https://*/*, http://*/*"

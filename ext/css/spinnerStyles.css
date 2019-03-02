@@ -1,0 +1,30 @@
+@keyframes imgSpinner {
+  to {transform: rotate(360deg);}
+}
+
+.blocked-content {
+  filter: blur(25px) !important;
+}
+
+.img-spinner {
+  position: relative;
+}
+
+.img-spinner:before {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 999999;
+  width: 50px;
+  height: 50px;
+  top: 50%;
+  left: 50%;
+  margin-top: -10px;
+  margin-left: -10px;
+  border-radius: 50%;
+  border: 1px solid #f6f;
+  border-top-color: #0e0;
+  border-right-color: #0dd;
+  border-bottom-color: #f90;
+  animation: imgSpinner .6s linear infinite;
+}
