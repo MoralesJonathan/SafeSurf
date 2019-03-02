@@ -1,16 +1,12 @@
 const router = require("express").Router();
-const campaignRoutes = require('./campaign');
-const customerRoutes = require('./customer');
+const userConfigRoutes = require('./userConfig');
 const trackingRoutes = require('./tracking');
-const airlineRoute = require('./airline')
-const templateRoute = require('./template')
-const cardRoute = require('./generateCard')
+const userRoute = require('./user')
+const imageRoute = require('./image')
 
-router.use("/campaign", campaignRoutes);
+router.use("/userConfig", userConfigRoutes);
 router.use("/tracking", trackingRoutes);
-router.use("/customer", customerRoutes);
-router.use("/airline", airlineRoute);
-router.use("/generateCard", cardRoute);
-router.use("/template", templateRoute);
+router.use("/user", userRoute);
+router.use("/image", imageRoute);
 
 module.exports = router;
