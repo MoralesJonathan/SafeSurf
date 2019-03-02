@@ -28,8 +28,10 @@ const mongodbConnection = require("../dbconfig/connection.js"),
             });
         },
         getUser: (id, cb) => {
+            console.log('looking for: ', id)
             const collection = mongodbConnection.db().collection("users");
             collection.findOne({ userName: id }, (err, result) => {
+                console.log('result: ', result);
                 !err ? cb(200, result) : cb(500, err);
             });
         },

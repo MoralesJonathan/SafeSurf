@@ -14,11 +14,13 @@
     -moz-transition: margin .25s ease-out;
     -o-transition: margin .25s ease-out;
     transition: margin .25s ease-out;
+    background-color: rgb(250 250	250);
   }
   
   #sidebar-wrapper .sidebar-heading {
     padding: 0.875rem 1.25rem;
-    font-size: 1.2rem;
+    font-size: 1em;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
   }
   
   #page-content-wrapper {
@@ -28,7 +30,22 @@
   #wrapper.toggled #sidebar-wrapper {
     margin-left: 0;
   }
+
+  .list-group-item {
+    color: #5f6368;
+    border: none;
+    background: none;
+    font-size: 0.85em;
+    padding-bottom: 10px;
+    padding-inline-start: 23px;
+    padding-top: 10px;
+  }
   
+  .list-group-item .material-icons {
+    margin-right: 13px;
+    vertical-align: bottom;
+  }
+
   @media (min-width: 768px) {
     #sidebar-wrapper {
       margin-left: 0;

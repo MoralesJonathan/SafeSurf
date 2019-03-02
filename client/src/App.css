@@ -18,6 +18,11 @@
   font-size: large;
 }
 
+#loginArea, #RegisterArea {
+  position: relative;
+  background-color: rgba(233, 236, 239, .6);
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

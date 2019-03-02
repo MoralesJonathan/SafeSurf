@@ -1,41 +1,18 @@
-// var css = `@keyframes img-spinner {
-//     to {transform: rotate(360deg);}
-//   }
-  
-//   .img-spinner:before {
-//     content: '';
-//     box-sizing: border-box;
-//     position: absolute;
-//     top: 50%;
-//     left: 50%;
-//     width: 20px;
-//     height: 20px;
-//     margin-top: -10px;
-//     margin-left: -10px;
-//     border-radius: 50%;
-//     border: 1px solid #f6f;
-//     border-top-color: #0e0;
-//     border-right-color: #0dd;
-//     border-bottom-color: #f90;
-//     animation: img-spinner .6s linear infinite;
-//   }`,
-//     head = document.head || document.getElementsByTagName('head')[0],
-//     style = document.createElement('style');
-
-// style.type = 'text/css';
-// if (style.styleSheet){
-//   // This is required for IE8 and below.
-//   style.styleSheet.cssText = css;
-// } else {
-//   style.appendChild(document.createTextNode(css));
-// }
-
-// head.appendChild(style);
-
-
+const IMG_ENDPOINT = 'http://localhost:3001/api/image';
+var isQueueInProcess = false;
 var elementsList = [];
-var loadingImgURL = chrome.extension.getURL("../assets/spinner.gif");
-var loadingImg = new Image();
+
+function debounce(func, delay) {
+    let debounceTimer;
+    return function() {
+        const context = this
+        const args = arguments;
+        clearTimeout(debounceTimer)
+        debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    } 
+}
+
+var debounceClearImages = debounce(clearImages, 500)
 
 function banImg(el) {
 
@@ -49,49 +26,61 @@ function setLoadingState(el) {
 
 }
 
-function init() {
+function clearImages() {
     var images = $('img');
-    var backgroundImages = $("div").filter(function() {
-        return $(this).css("background-image") !== 'none'
+    var backgroundImages = $("*").not('[data-timestamp]').filter(function() {
+        $(this).attr('data-surf-analyzed', true);
+        var backgroundImage = $(this).css("background-image")
+        return backgroundImage.includes('http');
     });
-
-
     images.each(function() {
         var $imgEl = $(this);
+        $imgEl.attr('data-surf-analyzed', true);
         var originalSrc = $imgEl.prop('src');
         $imgEl.css('position', 'relative').addClass('img-spinner blocked-content');
-        // var img = new Image();
-        // img.onload = function() {
-        //     // alert(this.width + 'x' + this.height);
-        //     var newImg = getLoadingImg({width: this.width, height: this.height});
-        //     $imgEl.prop('src',newImg);
-        //     img.remove();
-        // }
-        // img.src = originalSrc;
-        elementsList.push({el: $imgEl.get(0), url: originalSrc})
+        elementsList.push({$el: $imgEl, url: originalSrc, type: 'image'})
     })
-    
     backgroundImages.each(function() {
         console.log($(this));
         var $imgEl = $(this);
         $imgEl.addClass('img-spinner blocked-content');
         var originalSrc = $imgEl.css('background-image').replace('url(', '');
         originalSrc = originalSrc.substr(1, originalSrc.length - 3);
-        elementsList.push({el: $imgEl.get(0), url: originalSrc})
-        // var img = new Image();
-        // img.onload = function() {
-        //     var newImg = getLoadingImg({width: this.width, height: this.height});
-        //     $imgEl.css("background-image", `url(${newImg})`);
-        //     img.remove();
-        // }
-        // img.src = originalSrc;
+        elementsList.push({$el: $imgEl, url: originalSrc, type: 'background'})
     });
-    console.log("image url: ",elementsList);
-    var urls = images.map((i, el) => el.src).get().concat(backgroundImages.map((i, el) => el.style && el.style.backgroundImage).get());
-    console.log("images got: ",urls.length);
+    if(!isQueueInProcess) {
+
+    }
 }
 
-loadingImg.onload = function() {
-    init();
+function listenForNewElements() {
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            console.log('mutation aqui')
+            debounceClearImages();
+        })
+      })
+      observer.observe(document, {
+          childList: true
+        , subtree: true
+        , attributes: false
+        , characterData: false
+      })
 }
-loadingImg.src = loadingImgURL;
+
+function init() {
+    clearImages();
+    listenForNewElements();
+}
+
+function getImagesResults() {
+    isQueueInProcess = true;
+    var urls = elementsList.map(img => img.url);
+    $.ajax(IMG_ENDPOINT, {
+        data : JSON.stringify({imgSrcs: urls}),
+        contentType : 'application/json',
+        type : 'POST',
+    })
+}
+
+$(init)
