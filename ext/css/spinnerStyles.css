@@ -2,8 +2,39 @@
   to {transform: rotate(360deg);}
 }
 
+img, *[style^="background-image:"] {
+  opacity: 0;
+}
+.surf-clean img, .surf-clean *[style^="background-image:"] {
+  opacity: 1;
+}
+.blocked-content-hidden {
+  display: none !important;
+  visibility: hidden !important;
+}
+.blocked-content-opaque {
+  opacity: 0 !important;
+}
 .blocked-content {
-  filter: blur(25px) !important;
+  filter: blur(25px);
+}
+.blocked-content-0 {
+  filter: blur(0px) !important;
+}
+.blocked-content-1 {
+  filter: blur(10px) !important;
+}
+.blocked-content-2 {
+  filter: blur(20px) !important;
+}
+.blocked-content-3 {
+  filter: blur(30px) !important;
+}
+.blocked-content-4 {
+  filter: blur(40px) !important;
+}
+.blocked-content-5 {
+  filter: blur(50px) !important;
 }
 
 .img-spinner {

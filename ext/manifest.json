@@ -14,7 +14,7 @@
     "scripts": [
       "js/hot-reload.js"
     ],
-    "persistent": true
+    "persistent": false
   },
   "web_accessible_resources": [
     "assets/spinner.gif"
@@ -27,13 +27,19 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "matches": ["https://www.psfk.com/"],
+      "matches": ["https://www.psfk.com/", "http://*/*"],
       "css" : ["css/spinnerStyles.css"],
       "js": ["js/jquery/jquery.min.js", "src/main.js"]
     }
   ],
+  "externally_connectable": {
+    "ids": ["*"]
+  },
   "permissions": [
     "contentSettings",
-    "https://*/*, http://*/*"
+    "storage",
+    "tabs",
+    "http://*/*",
+    "https://*/*"
   ]
 }

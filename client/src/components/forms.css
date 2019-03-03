@@ -7,5 +7,8 @@
     overflow: scroll;
     outline: #a9a6a6 solid 2px;
     outline-offset: -2px;
+}
 
+.err-msg {
+    color: #d8292f;
 }

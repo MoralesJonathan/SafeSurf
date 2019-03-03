@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import "./App.css";
 import "./components/forms.css";
 import API from "./utils/API.js"
+import extensionBridge from "./utils/extensionBridge.js"
 import { PreferencesForm, DisplayForm, UserForm, HomeComponent, AnalyticsForm, ReportsForm } from "./components/side-forms/index.js"
 import Login from "./components/Login.js"
 import Register from "./components/Register.js"
@@ -20,11 +21,21 @@ class App extends Component {
       password: "",
       name: "",
       errMsg: "",
-      profile: {}
+      profile: {
+        
+      },
+      settings: {
+        display: {
+          blurLevel: 3,
+          blankContent: false,
+          showContent: true
+        }
+      }
     };
     this.handleRegister = this.handleRegister.bind(this);
     this.onUserAuth = this.onUserAuth.bind(this);
     this.handleLogin = this.handleLogin.bind(this);
+    this.changeDisplaySettings = this.changeDisplaySettings.bind(this);
   }
 
   handleInputChange = event => {
@@ -35,6 +46,15 @@ class App extends Component {
     });
   };
 
+  changeDisplaySettings = changeEvt => {
+    const { name, value } = changeEvt;
+    this.setState((prevState) => {
+      prevState.settings.display[name] = value;
+      return prevState;
+    });
+    extensionBridge.changeVisualSetting({name, value});
+  };
+
   handleLogin = (evt) => {
     evt && evt.preventDefault && evt.preventDefault();
     if (this.state.email && this.state.password) {
@@ -43,11 +63,15 @@ class App extends Component {
         password: this.state.password,
       }).then(this.onUserAuth).catch(err => {
         console.log(err);
-        if (err && err.response && err.response.data && err.response.data.user) {
+        const errRes = err && err.response;
+        if (errRes && err.response.data && err.response.data.user) {
           this.setState({errMsg: err.response.data.user})
         }
-        if (err && err.response && err.response.data && err.response.data.password) {
+        if (errRes && err.response.data && err.response.data.password) {
           this.setState({errMsg: err.response.data.password})
+        }
+        if(errRes && errRes.status === 400) {
+          this.setState({errMsg: "Wrong email or password"});
         }
       });
     }
@@ -83,13 +107,7 @@ class App extends Component {
     if (res && res.request.status === 200 || res.request.status === 201) {
       localStorage.setItem('user', this.state.email);
       API.setAuthToken(res.data.email);
-      // API.setAuthToken(res.data.token);
-    //   API.getProfile().then(this.onUserProfile).catch(e => {
-    //     console.log('error on user Login');
-        this.setState({ redirect: true });
-    //   });
-    // } else if (res.request.status === 401) {
-    //   console.log("BAD");
+      this.setState({ redirect: true });
     }
   }
 
@@ -105,8 +123,8 @@ class App extends Component {
     return (
       <BrowserRouter>
         <React.Fragment>
-          <Route exact path="/" render={(props) => (<Login {...props} errMsg={this.state.errMsg} translate={this.translate} handleLogin={this.handleLogin} handleInputChange={() => this.handleInputChange} />)} />
-          <Route exact path="/register" render={(props) => (<Register {...props} errMsg={this.state.errMsg} translate={this.translate} handleRegister={this.handleRegister} handleInputChange={() => this.handleInputChange} />)} />
+          <Route exact path="/" render={(props) => (<Login {...props} errMsg={this.state.errMsg} handleLogin={this.handleLogin} handleInputChange={() => this.handleInputChange} />)} />
+          <Route exact path="/register" render={(props) => (<Register {...props} errMsg={this.state.errMsg} handleRegister={this.handleRegister} handleInputChange={() => this.handleInputChange} />)} />
           <Route path="/app" render={(props) => (
             <React.Fragment>
               <Row>
@@ -125,12 +143,12 @@ class App extends Component {
                 </Col>
                 <Col xs={9}>
                   <Switch>
-                    <Route exact path="/app" component={HomeComponent} />
-                    <Route exact path="/app/preferences" component={PreferencesForm} />
-                    <Route exact path="/app/display" component={DisplayForm} />
-                    <Route exact path="/app/users" component={UserForm} />
-                    <Route exact path="/app/analytics" component={AnalyticsForm} />
-                    <Route exact path="/app/reports" component={ReportsForm} />
+                    <Route exact path="/app" render={(props) => (<HomeComponent {...props} {...this.state.settings} />)} />
+                    <Route exact path="/app/preferences" render={(props) => (<PreferencesForm {...props} {...this.state.settings} />)} />
+                    <Route exact path="/app/display" render={(props) => (<DisplayForm {...props} {...this.state.settings} changeDisplaySettings={this.changeDisplaySettings} />)} />
+                    <Route exact path="/app/users" render={(props) => (<UserForm {...props} {...this.state.settings} />)} />
+                    <Route exact path="/app/analytics" render={(props) => (<AnalyticsForm {...props} {...this.state.settings} />)} />
+                    <Route exact path="/app/reports" render={(props) => (<ReportsForm {...props} {...this.state.settings} />)} />
                   </Switch>
                 </Col>
               </Row>
