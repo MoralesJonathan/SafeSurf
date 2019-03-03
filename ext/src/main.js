@@ -11,7 +11,6 @@ document.addEventListener('VISUAL_SETTING_CHANGE', function(evt){
     const { name, value } = evt.detail;
     const toStore = {};
     toStore[name] = value;
-    console.log('about to save ' + toStore);
     sessionStorage.setItem(name, value);
     if(chrome.storage && chrome.storage.local) {
         chrome.storage.local.set(toStore, function() {
@@ -28,9 +27,9 @@ const DEFAULT_OPTIONS = {
     blankContent: false,
     showContent: true
 };
-const BAN_CLASS_NAMES = ['.blocked-content-hidden','.blocked-content-opaque','.blocked-content','.blocked-content-0','.blocked-content-1','.blocked-content-2','.blocked-content-3','.blocked-content-4','.blocked-content-5'];
+const BAN_CLASS_NAMES = ['blocked-content-hidden','blocked-content-opaque','blocked-content','blocked-content-0','blocked-content-1','blocked-content-2','blocked-content-3','blocked-content-4','blocked-content-5'];
+const BAN_CLASS_NAMES_SELECTORS = ['.blocked-content-hidden','.blocked-content-opaque','.blocked-content','.blocked-content-0','.blocked-content-1','.blocked-content-2','.blocked-content-3','.blocked-content-4','.blocked-content-5'];
 const OPTS = ['blurLevel','blankContent','showContent'];
-// const IMG_ENDPOINT = 'https://localhost:3001/api/image';
 const IMG_ENDPOINT = 'https://safesurfer.herokuapp.com/api/image';
 var ban_class_name = 'blocked-content';
 const ELEMENTS_PER_BASH = 10;
@@ -49,14 +48,11 @@ function loadConfig() {
             chrome.storage.local.get(OPTS, function(result) {
                 customConfig = result;
                 config = Object.assign({}, DEFAULT_OPTIONS, customConfig)
-                console.log("se va con customConfig: ", customConfig)
-                console.log("se va con config: ", config)
                 setBanClassName();
                 resolve();
             });
         }
         else {
-            console.log('grabbing default config');
             config = DEFAULT_OPTIONS;
             setBanClassName();
             resolve();
@@ -80,13 +76,13 @@ function clearBody() {
 
 function backToNormality() {
     clearBody();
-    $(BAN_CLASS_NAMES.join(',')).each((i, el) => {
+    $(BAN_CLASS_NAMES_SELECTORS.join(',')).each((i, el) => {
         unblockElement(el);
     })
 }
 
 function unblockElement(el) {
-    el.classList.remove(BAN_CLASS_NAMES.join(','));
+    el.removeClass(BAN_CLASS_NAMES.join(' '));
 }
 
 function banBackgroundImgAndGetUrl($el) {
@@ -135,7 +131,6 @@ function clearImages() {
 function listenForNewElements() {
     var observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
-            console.log('mutation happened')
             debounceClearImages();
         })
       })
@@ -177,21 +172,19 @@ function queueImages({startIndex = 0} = {}) {
 
 function deQueueImages({startIndex = 0, endIndex = 10}) {
     var bash = elementsList.splice(0, ELEMENTS_PER_BASH);
-    processedElementsList.push([...bash]);
+    processedElementsList = processedElementsList.concat(bash);
     var urlBash = bash.map(img => img.url);
     return urlBash;
 }
 
 function performImageAnalysis(urlBash) {
     isCallInProcess = true;
-    console.log('posting: ', urlBash)
     try {
         $.ajax(IMG_ENDPOINT, {
             data : JSON.stringify({imgSrcs: urlBash}),
             contentType : 'application/json',
             type : 'POST',
         }).then(data => {
-            console.log(data);
             deQueueElements(data);
         }).fail(err => {
             console.log('err while analyzing images. See network');
