@@ -14,7 +14,7 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      isLoggedIn: localStorage.getItem("jwtToken"),
+      isLoggedIn: localStorage.getItem("user"),
       redirect: false,
       email: "",
       password: "",
@@ -81,7 +81,7 @@ class App extends Component {
 
   onUserAuth(res) {
     if (res && res.request.status === 200 || res.request.status === 201) {
-      localStorage.setItem('jwtToken', this.state.email);
+      localStorage.setItem('user', this.state.email);
       API.setAuthToken(res.data.email);
       // API.setAuthToken(res.data.token);
     //   API.getProfile().then(this.onUserProfile).catch(e => {

@@ -5,9 +5,21 @@ userConfigs = {
                 cb(200)
             })
         },
-        getUserConfig: (config, cb) => {
+        getUserConfig: (user, cb) => {
             const collection = mongodbConnection.db().collection("userConfigs");
-            collection.findOne({"configName": config}, (err, result) => {
+            collection.findOne({"user": user}, (err, result) => {
+                !err ? cb(200, result) : cb(500, err);
+            });
+        },
+        getPreset: (preset, cb) => {
+            const collection = mongodbConnection.db().collection("presets");
+            collection.findOne({"preset": preset}, (err, result) => {
+                !err ? cb(200, result.template) : cb(500, err);
+            });
+        },
+        setUserConfig: (data, cb) => {
+            const collection = mongodbConnection.db().collection("userConfigs");
+            collection.insert(data, (err, result) => {
                 !err ? cb(200, result) : cb(500, err);
             });
         },
