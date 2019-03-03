@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
         var imgResults = await Promise.all(results);
         var data = imgResults.map((result, i ) => {
             const {IsImageAdultClassified, IsImageRacyClassified} = result.data;
-            return {orgSrc: imgSrcs[i], safe: IsImageAdultClassified || IsImageRacyClassified}
+            return {orgSrc: imgSrcs[i], safe: !IsImageAdultClassified || !IsImageRacyClassified}
         });
     }
     catch(err) {
