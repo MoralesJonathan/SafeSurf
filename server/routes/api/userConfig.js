@@ -10,8 +10,15 @@ router.get("/", (req, res) => {
     userConfigs.getAllUserConfigs((status, data = "ok") => res.status(status).send(data));
 });
 
-router.get("/:config", (req, res) => {
-    userConfigs.getUserConfig(req.params.config, (status, data = "ok") => res.status(status).send(data));
+router.get("/:user", (req, res) => {
+    userConfigs.getUserConfig(req.params.user,(status, data = "ok") => res.status(status).send(data));
+});
+
+router.put("/", (req, res) => {
+    const {preset, user} = req.body;
+    userConfigs.getPreset(preset, templateArray => {
+        userConfigs.setUserConfig({user:user, filter: templateArray}, (status, data = "ok") => res.status(status).send(data));
+    })
 });
 
 
