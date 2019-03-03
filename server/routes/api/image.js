@@ -1,5 +1,5 @@
 const router = require('express').Router(),
-    axios = require("axios");
+      axios = require("axios");
 
 const {AZURE_SUB_KEY_1, AZURE_SUB_KEY_2} = process.env;
 // let useKey1 = true;
@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
         });
     }
     catch(err) {
-        console.log('y u do dat :( ', err.message);
+        console.log('y u do dat :( ', err);
         res.status(500).json(err.message);
         req.next();
     }

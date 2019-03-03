@@ -10,10 +10,32 @@ import { Row, Col, Navbar } from "react-bootstrap";
 import SideNav from "./components/SideNav"
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
+const DEFAULT_OPTIONS = {
+  blurLevel: 3,
+  blankContent: false,
+  showContent: true
+};
+function loadConfig() {
+  const options = {};
+  var blurLevel = sessionStorage.getItem('blurLevel');
+  var blankContent = sessionStorage.getItem('blankContent');
+  var showContent = sessionStorage.getItem('showContent');
+  if (blurLevel) {
+    options.blurLevel = blurLevel;
+  }
+  if (blankContent) {
+    options.blankContent = blankContent === 'true';
+  }
+  if (showContent) {
+    options.showContent = showContent === 'true';
+  }
+  return Object.assign({}, DEFAULT_OPTIONS, options);
+}
 class App extends Component {
 
   constructor(props) {
     super(props)
+    var initialDisplayConfig = loadConfig();
     this.state = {
       isLoggedIn: localStorage.getItem("user"),
       redirect: false,
@@ -26,9 +48,7 @@ class App extends Component {
       },
       settings: {
         display: {
-          blurLevel: 3,
-          blankContent: false,
-          showContent: true
+          ...initialDisplayConfig
         }
       }
     };

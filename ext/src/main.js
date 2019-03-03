@@ -21,12 +21,13 @@ document.addEventListener('VISUAL_SETTING_CHANGE', function(evt){
     const toStore = {};
     toStore[name] = value;
     console.log('about to save ' + toStore);
+    sessionStorage.setItem(name, value);
     chrome.storage.local.set(toStore, function() {
         console.log('Value is set to ' + value);
     });
  }, false);
  
-const OBSERVE_DEBOUNCE_TIME = 1500;
+const OBSERVE_DEBOUNCE_TIME = 500;
 var debounceClearImages = debounce(clearImages, OBSERVE_DEBOUNCE_TIME)
 const DEFAULT_OPTIONS = {
     blurLevel: 3,
@@ -47,11 +48,14 @@ var elementsList = [];
 var processedElementsList = [];
 
 function loadConfig() {
-    chrome.storage.local.get(OPTS, function(result) {
-        config = Object.assign({}, DEFAULT_OPTIONS, result)
-        console.log('config got: ', config);
-        setBanClassName();
-    });
+    var customConfig = {}
+    if(chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(OPTS, function(result) {
+            customConfig = result;
+        });
+    }
+    config = Object.assign({}, DEFAULT_OPTIONS, customConfig)
+    setBanClassName();
 }
 
 function setBanClassName() {
@@ -98,18 +102,24 @@ function clearImages() {
     var backgroundImages = $("*").not('[data-timestamp]').filter(function() {
         var $el = $(this);
         $el.attr('data-surf-analyzed', true);
-        var backgroundImage = $el.css("background-image")
+        var backgroundImage = $el.css("background-image");
         return backgroundImage.includes('http');
     });
-    images.each(function() {
+    images.each(function(i, el) {
         var $imgEl = $(this);
-        var url = banImgAndGetUrl($imgEl);
-        elementsList.unshift({$el: $imgEl, url, type: 'image'})
+        var original = $imgEl.get(0);
+        if(original.clientWidth > 128 && original.clientHeight > 128 && $imgEl.prop('src').includes('http')) {
+            var url = banImgAndGetUrl($imgEl);
+            elementsList.unshift({$el: $imgEl, url, type: 'image'})
+        }
     })
     backgroundImages.each(function() {
         var $imgEl = $(this);
-        var url = banBackgroundImgAndGetUrl($imgEl);
-        elementsList.unshift({$el: $imgEl, url, type: 'background'})
+        var el = $imgEl.get(0);
+        if(el.clientWidth > 128 && el.clientHeight > 128) {
+            var url = banBackgroundImgAndGetUrl($imgEl);
+            elementsList.unshift({$el: $imgEl, url, type: 'background'})
+        }
     });
     if(!isQueueInProcess) {
         queueImages();
@@ -147,8 +157,8 @@ function queueImages({startIndex = 0} = {}) {
     // continue analyzing
     isQueueInProcess = true;
     // wait for call to finish
-    if (isCallInProcess || ALLOW_MULTIPLE_CALL) {
-        const urlBash = unQueueImages({startIndex, endIndex: ELEMENTS_PER_BASH + startIndex});
+    if (!isCallInProcess || ALLOW_MULTIPLE_CALL) {
+        const urlBash = deQueueImages({startIndex, endIndex: ELEMENTS_PER_BASH + startIndex});
         performImageAnalysis(urlBash);
     }
     if(startIndex === 0) { // condition to analyze other 10 images in pararell
@@ -158,7 +168,7 @@ function queueImages({startIndex = 0} = {}) {
     return null;
 }
 
-function unQueueImages({startIndex = 0, endIndex = 10}) {
+function deQueueImages({startIndex = 0, endIndex = 10}) {
     var bash = elementsList.splice(0, ELEMENTS_PER_BASH);
     processedElementsList.push([...bash]);
     var urlBash = bash.map(img => img.url);
@@ -175,7 +185,7 @@ function performImageAnalysis(urlBash) {
             type : 'POST',
         }).then(data => {
             console.log(data);
-            unQueueElements();
+            deQueueElements(data);
         }).fail(err => {
             console.log('err while analyzing images. See network');
             backToNormality();
@@ -190,7 +200,7 @@ function performImageAnalysis(urlBash) {
     }
 }
 
-function unQueueElements(results) {
+function deQueueElements(results) {
     var srcDecodedURI = '';
     var matchRecordsIndex = [];
     results.forEach(src => {

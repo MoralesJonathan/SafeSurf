@@ -7,16 +7,17 @@ import 'react-input-range/lib/css/index.css';
 
 function DisplayForm(props) {
     const displayProps = props.display;
+    const styles = {filter:`blur(${props.display.blurLevel * 10}px)`, opacity: displayProps.blankContent ? 0 : 1, display: displayProps.showContent ? 'block' : 'none', width: '100%'};
     return (
         <React.Fragment>
             <Container style={{ paddingTop: "20px" }}>
                 <h1>Display</h1>
-                <div style={{filter:`blur(${props.display.blurLevel * 10}px)`, opacity: displayProps.blankContent ? 0 : 1, display: displayProps.showContent ? 'block' : 'none'}}>
-                    <img style={{width: '100%'}} src="https://media-assets-04.thedrum.com/cache/images/thedrum-prod/s3-news-tmp-108565-screen_shot_2018-01-03_at_3.22.11_pm--2x1--940.png" />
+                <div style={styles}>
+                    <img style={styles} src="https://media-assets-04.thedrum.com/cache/images/thedrum-prod/s3-news-tmp-108565-screen_shot_2018-01-03_at_3.22.11_pm--2x1--940.png" />
                     <p style={{textAlign:'center'}}>Karl Marx was a great man!</p>
                 </div>
                 <div className="form-group">
-                    <label>Blurriness level</label>
+                    <label>Blurriness level: {displayProps.blurLevel}</label>
                     <InputRange
                         name="blurLevel"
                         maxValue={5}
