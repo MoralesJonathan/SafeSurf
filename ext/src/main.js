@@ -30,7 +30,7 @@ const DEFAULT_OPTIONS = {
 };
 const BAN_CLASS_NAMES = ['.blocked-content-hidden','.blocked-content-opaque','.blocked-content','.blocked-content-0','.blocked-content-1','.blocked-content-2','.blocked-content-3','.blocked-content-4','.blocked-content-5'];
 const OPTS = ['blurLevel','blankContent','showContent'];
-const IMG_ENDPOINT = 'http://localhost:3001/api/image';
+const IMG_ENDPOINT = 'http://10.169.81.74:3001/api/image';
 var ban_class_name = 'blocked-content';
 const ELEMENTS_PER_BASH = 10;
 const ALLOW_MULTIPLE_CALL = false;
