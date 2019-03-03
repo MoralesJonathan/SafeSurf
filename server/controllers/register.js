@@ -10,6 +10,9 @@ const bcrypt = require('bcrypt'),
     },
     register = (data, cb) => {
         const { username, password, firstName, lastName, email} = data;
+        if(!password || !userName) {
+            cb(500,'no username or password provided')
+        }
         bcrypt.hash(password, 10, (err, hash) => {
             if (!err) {
                 const collection = mongodbConnection.db().collection("login");

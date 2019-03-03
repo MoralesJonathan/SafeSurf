@@ -1,12 +1,3 @@
-// {
-//     "orgSrc": "https://pmcvariety.files.wordpress.com/2018/09/d-trump.jpg?w=1000",
-//     "safe": false
-// },
-// {
-//     "orgSrc": "https://www.ft.com/__origami/service/image/v2/images/raw/https%3A%2F%2Fs3-ap-northeast-1.amazonaws.com%2Fpsh-ex-ftnikkei-3937bb4%2Fimages%2F6%2F8%2F4%2F9%2F15649486-1-eng-GB%2FRTS20UQK.jpg?source=nar-cms",
-//     "safe": false
-// }
-
 function debounce(func, delay) {
     let debounceTimer;
     return function() {
@@ -22,10 +13,13 @@ document.addEventListener('VISUAL_SETTING_CHANGE', function(evt){
     toStore[name] = value;
     console.log('about to save ' + toStore);
     sessionStorage.setItem(name, value);
-    chrome.storage.local.set(toStore, function() {
-        console.log('Value is set to ' + value);
-    });
- }, false);
+    if(chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set(toStore, function() {
+            console.log('Name: ', name, '. Value: ', value);
+            init();
+        });
+    }
+ }.bind(this), false);
  
 const OBSERVE_DEBOUNCE_TIME = 500;
 var debounceClearImages = debounce(clearImages, OBSERVE_DEBOUNCE_TIME)
@@ -48,14 +42,25 @@ var elementsList = [];
 var processedElementsList = [];
 
 function loadConfig() {
-    var customConfig = {}
-    if(chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(OPTS, function(result) {
-            customConfig = result;
-        });
-    }
-    config = Object.assign({}, DEFAULT_OPTIONS, customConfig)
-    setBanClassName();
+    return new Promise((resolve, reject) => {
+        var customConfig = {}
+        if(chrome.storage && chrome.storage.local) {
+            chrome.storage.local.get(OPTS, function(result) {
+                customConfig = result;
+                config = Object.assign({}, DEFAULT_OPTIONS, customConfig)
+                console.log("se va con customConfig: ", customConfig)
+                console.log("se va con config: ", config)
+                setBanClassName();
+                resolve();
+            });
+        }
+        else {
+            console.log('grabbing default config');
+            config = DEFAULT_OPTIONS;
+            setBanClassName();
+            resolve();
+        }
+    });
 }
 
 function setBanClassName() {
@@ -84,7 +89,7 @@ function unblockElement(el) {
 }
 
 function banBackgroundImgAndGetUrl($el) {
-    $el.addClass('blocked-content');
+    $el.addClass(ban_class_name);
     var originalSrc = $el.css('background-image').replace('url(', '');
     originalSrc = originalSrc.substr(1, originalSrc.length - 3);
     originalSrc = decodeURIComponent(originalSrc);
@@ -93,7 +98,7 @@ function banBackgroundImgAndGetUrl($el) {
 
 function banImgAndGetUrl($el) {
     var originalSrc = decodeURIComponent($el.prop('src'));
-    $el.addClass('blocked-content');
+    $el.addClass(ban_class_name);
     return originalSrc;
 }
 
@@ -142,9 +147,10 @@ function listenForNewElements() {
 }
 
 function init() {
-    loadConfig();
-    clearImages();
-    listenForNewElements();
+    loadConfig().then(res => {
+        clearImages();
+        listenForNewElements();
+    });
 }
 
 function queueImages({startIndex = 0} = {}) {
@@ -220,6 +226,7 @@ function deQueueElements(results) {
         for (var i = matchRecordsIndex.length; i >= 0; i--) {
             processedElementsList.splice(matchRecordsIndex[i], 1);
             blockedHere ++;
+            console.log("blocked ", blockedHere, " times!");
         }
         matchRecordsIndex = [];
     })

@@ -39,6 +39,8 @@
     "contentSettings",
     "storage",
     "tabs",
+    "activeTab",
+    "unlimitedStorage",
     "http://*/*",
     "https://*/*"
   ]

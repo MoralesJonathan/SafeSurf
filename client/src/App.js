@@ -21,7 +21,7 @@ function loadConfig() {
   var blankContent = sessionStorage.getItem('blankContent');
   var showContent = sessionStorage.getItem('showContent');
   if (blurLevel) {
-    options.blurLevel = blurLevel;
+    options.blurLevel = +blurLevel;
   }
   if (blankContent) {
     options.blankContent = blankContent === 'true';
