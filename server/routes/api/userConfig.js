@@ -15,7 +15,7 @@ router.get("/:user", (req, res) => {
 });
 
 router.put("/", (req, res) => {
-    const {preset, user} = req.params;
+    const {preset, user} = req.body;
     userConfigs.getPreset(preset, templateArray => {
         userConfigs.setUserConfig({user:user, filter: templateArray}, (status, data = "ok") => res.status(status).send(data));
     })
