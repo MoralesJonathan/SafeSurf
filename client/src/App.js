@@ -39,7 +39,7 @@ class App extends Component {
     evt && evt.preventDefault && evt.preventDefault();
     if (this.state.email && this.state.password) {
       API.login({
-        email: this.state.email,
+        username: this.state.email,
         password: this.state.password,
       }).then(this.onUserAuth).catch(err => {
         console.log(err);

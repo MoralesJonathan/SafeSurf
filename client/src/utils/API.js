@@ -9,11 +9,10 @@ export default {
     // }
   },
   login: function (loginData) {
-    return axios.get("/api/user/" + loginData.email)
-    // return axios.post("/api/users/login/", loginData)
+    return axios.post("/api/login/", loginData)
   },
   register: function (signupData) {
-    return axios.put("/api/user/", signupData)
+    return axios.post("/api/register", signupData)
   },
   setProfile: function(profile) {
     return axios.post("/api/profile/new/", {...profile, json: true});
